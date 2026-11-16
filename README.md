@@ -313,7 +313,7 @@ Os erros seguem sempre o formato `{ "status": "error", "code": "...", "message":
 
 - [ ] Gateway de pagamento real (Mercado Pago ou Stripe) com confirmação por webhook e divisão do valor
 - [ ] Atualização da sala em tempo real com WebSocket (hoje: polling a cada 3s)
-- [ ] Painel administrativo da arena (horários, faturamento, bloqueio de quadras, alunos)
+- [X] Painel administrativo da arena (horários, faturamento, bloqueio de quadras, alunos)
 - [ ] Alerta de chuva para os horários reservados (API de clima)
 - [ ] Galeria de fotos e vídeos das partidas
 - [ ] Fator K maior nas primeiras partidas de cada jogador
