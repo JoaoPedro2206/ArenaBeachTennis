@@ -1,26 +1,5 @@
 # Backlog do ArenaBeach (issues)
 
-Cada arquivo `NN-*.md` desta pasta é uma issue pronta para o GitHub: contexto (com o que já existe no código), objetivo, escopo em checklist, critérios de aceite, riscos e dependências.
-
-## Publicar no GitHub
-
-1. Instale o [GitHub CLI](https://cli.github.com) e autentique: `gh auth login`.
-2. Veja o que será criado, sem enviar nada:
-
-   ```powershell
-   .\scripts\create-issues.ps1 -DryRun
-   ```
-
-3. Crie as issues (cria os labels, pula títulos que já existem — pode rodar de novo sem duplicar):
-
-   ```powershell
-   .\scripts\create-issues.ps1
-   ```
-
-   Só algumas: `.\scripts\create-issues.ps1 -Only 1,6,8`
-
-> Sem o `gh`, copie o conteúdo de cada arquivo (sem o cabeçalho entre `---`) para uma nova issue e use `title`/`labels` do cabeçalho.
-
 ## Prioridades
 
 - **P0** — bloqueia colocar uma arena para operar de verdade.
