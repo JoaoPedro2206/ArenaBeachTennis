@@ -1,0 +1,224 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   ArenaBeach — Design System
+   Paleta extraída do logo da arena (preto + amarelo-sol + ondas azul/verde)
+   e da foto da quadra (bola laranja, areia, céu).
+
+   Regra de uso:
+   - CTA principal (uma por tela) ......... amarelo-sol + texto preto (como a raquete)
+   - Seleção / links / foco ............... azul-oceano
+   - Destaques, selos, ícones de status ... laranja da bola
+   - Fundo das telas ...................... areia clara; cards em branco SEM borda
+   ========================================================================== */
+
+:root {
+  /* Superfícies (areia) */
+  --background: #f6f3ec;
+  --surface: #ffffff;
+  --surface-muted: #efe9de;
+  --surface-sunken: #e8e1d3;
+
+  /* Texto (o preto do logo, suavizado em 3 níveis) */
+  --ink: #111111;
+  --ink-muted: #5c5a55;
+  --ink-subtle: #8f8b82;
+  --ink-inverse: #ffffff;
+
+  /* Marca */
+  --primary: #0890c0; /* ondas do logo */
+  --primary-strong: #06739a;
+  --primary-soft: #e3f4fa;
+  --cta: #f8e800; /* sol do logo */
+  --cta-strong: #e6d500;
+  --cta-ink: #111111;
+  --accent: #ff6b2c; /* bola */
+  --accent-strong: #c2410c;
+  --accent-soft: #ffeee5;
+
+  /* Feedback */
+  --success: #2f8a4c; /* verde das ondas, escurecido p/ contraste */
+  --success-soft: #e6f4ea;
+  --danger: #d93f3f;
+  --danger-soft: #fdecec;
+  --warning-ink: #8a5a00;
+  --warning-soft: #fff6d6;
+
+  /* Escala de espaçamento (base 4px). Use SÓ estes passos. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Raios */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Sombras difusas (tom quente, nunca cinza puro) */
+  --shadow-xs: 0 1px 2px rgb(60 45 20 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(60 45 20 / 0.04), 0 4px 12px rgb(60 45 20 / 0.06);
+  --shadow-md: 0 2px 4px rgb(60 45 20 / 0.04), 0 12px 28px rgb(60 45 20 / 0.10);
+  --shadow-lg: 0 8px 16px rgb(60 45 20 / 0.06), 0 24px 56px rgb(60 45 20 / 0.16);
+  --shadow-primary: 0 8px 20px rgb(8 144 192 / 0.32);
+  --shadow-cta: 0 8px 20px rgb(214 196 0 / 0.40);
+
+  /* Movimento */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration: 200ms;
+}
+
+/* Expõe os tokens como classes Tailwind: bg-surface, text-ink-muted, bg-cta... */
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-cta: var(--cta);
+  --color-cta-strong: var(--cta-strong);
+  --color-cta-ink: var(--cta-ink);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning-ink: var(--warning-ink);
+  --color-warning-soft: var(--warning-soft);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-cta: var(--shadow-cta);
+
+  --ease-out: var(--ease-out);
+
+  --animate-fade-in: fade-in 200ms var(--ease-out) both;
+  --animate-slide-up: slide-up 320ms var(--ease-out) both;
+  --animate-scale-in: scale-in 240ms var(--ease-out) both;
+  --animate-pop: pop 420ms var(--ease-out) both;
+  /* `backwards` (e não `both`): ao terminar, nenhum transform fica aplicado.
+     Um transform residual — mesmo identidade — faria o <main> virar referência
+     para filhos `position: fixed` (a barra de resumo da reserva sumia da tela). */
+  --animate-rise: rise 360ms var(--ease-out) backwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+/* Entrada suave de conteúdo da página (ver nota em --animate-rise) */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilitários do layout
+   ------------------------------------------------------------------------- */
+
+/* BottomTabBar flutuante: 64px de barra + 12px de respiro + safe area */
+@utility pb-tabbar {
+  padding-bottom: calc(64px + 12px + var(--space-6) + env(safe-area-inset-bottom));
+}
+@utility bottom-tabbar {
+  bottom: calc(64px + 12px + var(--space-2) + env(safe-area-inset-bottom));
+}
+
+/* Vidro fosco (header, tab bar, barras fixas) */
+@utility glass {
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Carrosséis com rolagem por toque, sem barra visível */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Rótulo de seção: pequeno, caixa-alta, espaçado */
+@utility eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-subtle);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--background);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Hierarquia tipográfica: títulos marcantes e compactos */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--cta);
+    color: var(--cta-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Quem prefere menos movimento não vê animações */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
