@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BottomTabBar } from '@/components/layout/BottomTabBar';
 import { NAV_ITEMS } from '@/components/layout/navItems';
 import { Logo } from '@/components/ui/Logo';
+import { VerifyEmailBanner } from '@/components/layout/VerifyEmailBanner';
 import { Avatar } from '@/components/ui/Avatar';
 import { ChartIcon } from '@/components/icons';
 import { PATHS } from '@/routes/paths';
@@ -64,6 +65,8 @@ export function AppLayout() {
           )}
         </div>
       </header>
+
+      <VerifyEmailBanner />
 
       {/* key = pathname: reanima a entrada ao trocar de aba */}
       <main key={pathname} className="mx-auto max-w-5xl animate-rise px-4 pt-6 sm:px-6 sm:pt-8">

@@ -11,6 +11,7 @@ export const publicUserSelect = {
   bio: true,
   role: true,
   eloScore: true,
+  emailVerifiedAt: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.UserSelect;
@@ -32,7 +33,7 @@ export class UsersRepository {
   findByEmailWithPassword(email: string) {
     return this.db.user.findUnique({
       where: { email },
-      select: { ...publicUserSelect, passwordHash: true, isActive: true },
+      select: { ...publicUserSelect, passwordHash: true, isActive: true, tokenVersion: true },
     });
   }
 
@@ -40,7 +41,22 @@ export class UsersRepository {
   findAuthInfo(id: string) {
     return this.db.user.findUnique({
       where: { id },
-      select: { id: true, role: true, isActive: true },
+      select: { id: true, role: true, isActive: true, tokenVersion: true, emailVerifiedAt: true },
+    });
+  }
+
+  /** Dados mínimos para enviar e-mails da conta (nunca expostos na API) */
+  findMailInfoByEmail(email: string) {
+    return this.db.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true, isActive: true, emailVerifiedAt: true },
+    });
+  }
+
+  findMailInfoById(id: string) {
+    return this.db.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, isActive: true, emailVerifiedAt: true },
     });
   }
 

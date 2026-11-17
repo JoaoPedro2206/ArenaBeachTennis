@@ -10,6 +10,9 @@ import { DEFAULT_PRIVATE_PATH, PATHS } from './paths';
 // Code splitting: cada página vira um chunk carregado sob demanda (melhor no 4G)
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
 const HomePage = lazy(() => import('@/pages/home/HomePage'));
 const BookingPage = lazy(() => import('@/pages/booking/BookingPage'));
 const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
@@ -37,10 +40,15 @@ const router = createBrowserRouter([
         children: [
           { path: PATHS.login, element: withSuspense(<LoginPage />) },
           { path: PATHS.register, element: withSuspense(<RegisterPage />) },
+          { path: PATHS.forgotPassword, element: withSuspense(<ForgotPasswordPage />) },
+          { path: PATHS.resetPassword, element: withSuspense(<ResetPasswordPage />) },
         ],
       },
     ],
   },
+
+  // Link do e-mail de confirmação: abre logado ou não
+  { path: PATHS.verifyEmail, element: withSuspense(<VerifyEmailPage />), errorElement: <RouteErrorPage /> },
 
   // ---------- Rotas privadas (exigem login) ----------
   {
