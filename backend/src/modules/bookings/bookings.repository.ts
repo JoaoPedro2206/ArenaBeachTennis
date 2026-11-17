@@ -25,8 +25,18 @@ export type BookingView = Prisma.BookingGetPayload<{ select: typeof bookingSelec
 /** Nome da EXCLUSION CONSTRAINT criada na migration booking_no_overlap */
 const OVERLAP_CONSTRAINT = 'bookings_no_overlap';
 
+/**
+ * A inserção perdeu para outra reserva no mesmo horário.
+ *
+ * Além da violação (23P01), dois INSERTs simultâneos e conflitantes podem
+ * terminar em DEADLOCK (40P01): cada um espera a transação do outro para
+ * checar a EXCLUDE constraint, e o Postgres aborta um deles. Num INSERT de
+ * uma única reserva o único motivo para isso é o conflito de horário — então
+ * é o mesmo 409, não um 500.
+ */
 export function isOverlapViolation(error: unknown): boolean {
-  return error instanceof Error && (error.message.includes(OVERLAP_CONSTRAINT) || error.message.includes('23P01'));
+  if (!(error instanceof Error)) return false;
+  return error.message.includes(OVERLAP_CONSTRAINT) || error.message.includes('23P01') || error.message.includes('40P01');
 }
 
 type Db = PrismaClient | Prisma.TransactionClient;

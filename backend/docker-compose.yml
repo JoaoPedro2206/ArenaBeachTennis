@@ -11,5 +11,26 @@ services:
     volumes:
       - arenabeach_pgdata:/var/lib/postgresql/data
 
+  # Banco SÓ para a suíte de testes de integração (npm run test:db:up).
+  # Dados em memória (tmpfs): rápido e descartável — nunca toca no banco de dev.
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: arenabeach-db-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: arenabeach_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    # Durabilidade não importa aqui: desligar o fsync deixa a suíte bem mais rápida
+    command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d arenabeach_test"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
 volumes:
   arenabeach_pgdata:

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { isProduction } from '../../config/env';
+import { env, isProduction } from '../../config/env';
 
 /**
  * Instância única do PrismaClient (evita múltiplos pools de conexão
@@ -10,7 +10,8 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: isProduction ? ['error'] : ['warn', 'error'],
+    // Nos testes, erros esperados (conflitos, deadlocks provocados) não poluem a saída
+    log: isProduction ? ['error'] : env.NODE_ENV === 'test' ? [] : ['warn', 'error'],
   });
 
 if (!isProduction) {

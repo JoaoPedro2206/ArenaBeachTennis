@@ -45,6 +45,8 @@ export const reportsQuerySchema = arenaQuerySchema.extend({
 /** Bloqueios longos (reforma) são aceitos, mas com teto para evitar erro de digitação */
 export const MAX_BLOCK_DAYS = 31;
 
+const bothDates = (b: { startTime: unknown; endTime: unknown }) => b.startTime instanceof Date && b.endTime instanceof Date;
+
 export const blockSchema = z
   .object({
     courtId: z.string().uuid('ID de quadra inválido'),
@@ -53,8 +55,10 @@ export const blockSchema = z
     reason: z.string().trim().max(200, 'Motivo muito longo').optional(),
   })
   .strict()
-  .refine((b) => b.endTime > b.startTime, { message: 'O fim precisa ser depois do início', path: ['endTime'] })
-  .refine((b) => b.endTime.getTime() - b.startTime.getTime() <= MAX_BLOCK_DAYS * 24 * 60 * 60_000, {
+  // O Zod roda estas checagens mesmo quando uma data já falhou (aí ela ainda é
+  // string): sem a guarda, data malformada virava TypeError/500 em vez de 422.
+  .refine((b) => !bothDates(b) || b.endTime > b.startTime, { message: 'O fim precisa ser depois do início', path: ['endTime'] })
+  .refine((b) => !bothDates(b) || b.endTime.getTime() - b.startTime.getTime() <= MAX_BLOCK_DAYS * 24 * 60 * 60_000, {
     message: `Bloqueios podem durar no máximo ${MAX_BLOCK_DAYS} dias. Para mais tempo, coloque a quadra inteira em manutenção.`,
     path: ['endTime'],
   });

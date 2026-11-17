@@ -17,6 +17,7 @@
 - [Stack](#stack)
 - [Arquitetura](#arquitetura)
 - [Como rodar](#como-rodar)
+- [Testes](#testes)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Regras de negócio](#regras-de-negócio)
 - [API](#api)
@@ -176,8 +177,54 @@ O seed cria um **admin da arena** e **dois professores**. Os e-mails e as senhas
 | backend | `npm run build` / `npm start` | Compila para `dist/` / roda a versão compilada |
 | backend | `npm run typecheck` | Verifica tipos |
 | backend | `npx prisma studio` | Interface visual do banco |
+| backend | `npm test` | Roda todos os testes (ver [Testes](#testes)) |
 | frontend | `npm run dev` | App com recarga automática |
 | frontend | `npm run build` | Build de produção em `dist/` |
+
+## Testes
+
+O backend usa **Vitest** + **supertest**, em duas suítes:
+
+| Suíte | Onde | O que cobre | Precisa de banco? |
+|---|---|---|---|
+| `unit` | `backend/tests/unit/` e `backend/tests/*.test.ts` | Funções puras: ELO, categorias, grade de horários, fuso horário, preços, validações do painel, fluxos de auth com fakes | Não |
+| `integration` | `backend/tests/integration/` | Rotas e serviços contra um **PostgreSQL real**: concorrência em reservas, pagamento × expiração, cancelamento × pagamento, salas de partida, ELO, painel admin, relatórios, cadastro e login | Sim |
+
+A integração usa Postgres de verdade (não SQLite nem mocks) porque as regras críticas dependem da `EXCLUDE USING gist` de reservas e de `SELECT … FOR UPDATE`.
+
+### Rodando
+
+```bash
+cd backend
+npm run test:db:up   # sobe o Postgres de teste (porta 5434, dados em memória)
+npm test             # unitários + integração
+```
+
+| Comando | O que faz |
+|---|---|
+| `npm test` | Tudo, uma vez |
+| `npm run test:unit` | Só os unitários (não precisa de Docker) |
+| `npm run test:integration` | Só a integração |
+| `npm run test:watch` | Modo watch |
+| `npm run test:coverage` | Tudo + relatório de cobertura em `backend/coverage/` (falha se as regras puras ficarem abaixo de 90%) |
+| `npm run test:db:down` | Para o Postgres de teste |
+
+### Como funciona o banco de teste
+
+- É o serviço `postgres-test` do [`backend/docker-compose.yml`](backend/docker-compose.yml): separado do banco de desenvolvimento (porta 5434, banco `arenabeach_test`), com os dados em `tmpfs`. Parar o container apaga tudo.
+- Antes da suíte, o `prisma migrate deploy` aplica as migrations. Antes de **cada teste**, todas as tabelas são truncadas.
+- Por segurança, a suíte se recusa a rodar se o `DATABASE_URL` não apontar para um banco terminado em `_test`.
+- No CI (ou com outro Postgres), defina `TEST_DATABASE_URL`, por exemplo `postgresql://postgres:postgres@localhost:5432/arenabeach_test`.
+
+### Escrevendo testes
+
+- **Fábricas** em [`backend/tests/integration/helpers/factories.ts`](backend/tests/integration/helpers/factories.ts): `makeUser`, `makeArena`, `makeCourt`, `makeBooking`, `makeMatch`, mais `authHeader(user)` (JWT pronto para o supertest) e `localSlot(dias, minutos)` (horário local da arena).
+- **Relógio injetável:** os services aceitam `now` como último parâmetro. Passe uma data fixa em vez de depender do relógio real.
+- **Concorrência:** dispare as operações com `Promise.allSettled([...])` e verifique o **estado final no banco**, não só as respostas.
+
+### Regra: todo bug corrigido entra com um teste de regressão
+
+O teste deve falhar sem a correção e passar com ela. Use "regressão" no nome do teste e explique em um comentário qual cenário quebrava. Veja exemplos em `tests/integration/bookings.test.ts` (cancelamento × pagamento) e `tests/unit/admin-schemas.test.ts` (data malformada no bloqueio).
 
 ## Variáveis de ambiente
 
@@ -308,6 +355,7 @@ Os erros seguem sempre o formato `{ "status": "error", "code": "...", "message":
 | Porta 3333 ocupada mesmo após parar o backend | Sobrou um processo `tsx watch` no Windows: `npx kill-port 3333` |
 | Classes do Tailwind não aplicadas em um componente novo | Reinicie o `npm run dev` do frontend (o build de produção não é afetado) |
 | Login dá "Erro inesperado" | A API não está no ar: confira o terminal do backend e `GET /api/v1/health` |
+| `Não foi possível preparar o banco de teste` no `npm test` | O Postgres de teste não está no ar: `npm run test:db:up` em `backend/` (com o Docker Desktop aberto) |
 
 ## Próximos passos
 
@@ -317,7 +365,9 @@ Os erros seguem sempre o formato `{ "status": "error", "code": "...", "message":
 - [ ] Alerta de chuva para os horários reservados (API de clima)
 - [ ] Galeria de fotos e vídeos das partidas
 - [ ] Fator K maior nas primeiras partidas de cada jogador
-- [ ] Testes automatizados (unitários das regras de ELO e de horários; integração das rotas)
+- [X] Testes automatizados (unitários das regras de ELO e de horários; integração das rotas)
+- [ ] CI com GitHub Actions rodando a suíte de testes
+- [ ] Testes do frontend e E2E
 - [ ] Refresh token em cookie `httpOnly` (hoje o JWT fica no `localStorage`)
 
 ## Licença

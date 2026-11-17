@@ -184,7 +184,9 @@ export class MatchesService {
     if (!match) throw new NotFoundError('Código inválido ou partida já encerrada');
     if (match.participants.some((p) => p.userId === userId)) return toView(match, userId); // já está dentro
 
-    await this.ensureNotInAnotherMatch(userId);
+    // Toque duplo: a 1ª requisição pode ter colocado o jogador NESTA sala depois
+    // da leitura acima — isso não é "outra partida" (a transação abaixo resolve)
+    await this.ensureNotInAnotherMatch(userId, match.id);
 
     await this.matchesRepository.transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM match_sessions WHERE id = ${match.id}::uuid FOR UPDATE`;
@@ -406,9 +408,9 @@ export class MatchesService {
   }
 
   /** Uma partida ao vivo por vez: evita pontos duplicados e confusão de salas */
-  private async ensureNotInAnotherMatch(userId: string): Promise<void> {
+  private async ensureNotInAnotherMatch(userId: string, currentMatchId?: string): Promise<void> {
     const active = await this.matchesRepository.findActiveForUser(userId);
-    if (active) {
+    if (active && active.id !== currentMatchId) {
       throw new AppError('Você já está em outra partida ao vivo. Saia dela antes.', 409, 'ALREADY_IN_MATCH');
     }
   }
