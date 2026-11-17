@@ -31,6 +31,7 @@ async function main(): Promise<void> {
       email: 'admin@arenabeach.test',
       passwordHash: await bcrypt.hash('Admin1234', 10),
       role: 'ARENA_ADMIN',
+      emailVerifiedAt: new Date(),
       eloScore: 1600, // Categoria B
     },
   });
@@ -121,7 +122,7 @@ async function seedTeachersAndLessons(adminId: string): Promise<void> {
     const user = await prisma.user.upsert({
       where: { email: t.email },
       update: {},
-      create: { name: t.name, email: t.email, passwordHash, role: 'TEACHER', eloScore: 1800 }, // Categoria A
+      create: { name: t.name, email: t.email, passwordHash, role: 'TEACHER', eloScore: 1800, emailVerifiedAt: new Date() }, // Categoria A
     });
     const teacher = await prisma.teacher.upsert({
       where: { userId: user.id },

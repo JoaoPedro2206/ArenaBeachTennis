@@ -14,9 +14,11 @@ export const optionalAuthenticated: RequestHandler = async (req, _res, next) => 
   if (scheme !== 'Bearer' || !token) return next();
 
   try {
-    const { sub } = verifyAccessToken(token);
+    const { sub, tokenVersion } = verifyAccessToken(token);
     const user = await usersRepository.findAuthInfo(sub);
-    if (user?.isActive) req.user = { id: user.id, role: user.role };
+    if (user?.isActive && user.tokenVersion === tokenVersion) {
+      req.user = { id: user.id, role: user.role, emailVerified: user.emailVerifiedAt !== null };
+    }
   } catch {
     /* visitante */
   }

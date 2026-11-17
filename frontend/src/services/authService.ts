@@ -7,6 +7,17 @@ export const authService = {
 
   register: (data: RegisterInput) => api<AuthResponse>('/auth/register', { method: 'POST', body: data }),
 
+  forgotPassword: (email: string) =>
+    api<{ message: string }>('/auth/forgot-password', { method: 'POST', body: { email } }),
+
+  resetPassword: (token: string, password: string) =>
+    api<{ message: string }>('/auth/reset-password', { method: 'POST', body: { token, password } }),
+
+  verifyEmail: (token: string) => api<{ message: string }>('/auth/verify-email', { method: 'POST', body: { token } }),
+
+  resendVerification: () =>
+    api<{ message: string; alreadyVerified: boolean }>('/auth/resend-verification', { method: 'POST' }),
+
   me: (signal?: AbortSignal) => api<{ user: User }>('/users/me', { signal }).then((r) => r.user),
 
   /** PATCH /users/profile — envia só os campos alterados */

@@ -130,12 +130,17 @@ model User {
   /// código (modules/rating/categories.ts) — não é mais escolhida pelo jogador.
   eloScore     Int      @default(1000) @map("elo_score")
   isActive     Boolean  @default(true) @map("is_active")
+  /// Quando o e-mail foi confirmado (null = pendente). Exigido para reservar/pagar.
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(3)
+  /// Incrementada ao redefinir a senha: JWTs emitidos antes deixam de valer.
+  tokenVersion    Int       @default(0) @map("token_version")
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   // Relações
-  ownedArenas         Arena[]            @relation("ArenaOwner")
+  authTokens          AuthToken[]
+  ownedArenas        Arena[]            @relation("ArenaOwner")
   bookings            Booking[]          @relation("BookingUser")
   hostedMatches       MatchSession[]     @relation("MatchHost")
   matchParticipations MatchParticipant[]
@@ -147,6 +152,29 @@ model User {
   @@index([role])
   @@index([eloScore])
   @@map("users")
+}
+
+/// Finalidade de um token enviado por e-mail
+enum AuthTokenType {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+/// Tokens de uso único enviados por e-mail. Só o hash SHA-256 é gravado;
+/// o token em si existe apenas no e-mail do usuário.
+model AuthToken {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  type      AuthTokenType
+  tokenHash String        @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime      @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime?     @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("auth_tokens")
 }
 
 // -----------------------------------------------------------------------------

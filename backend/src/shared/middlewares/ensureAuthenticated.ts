@@ -21,14 +21,19 @@ export const ensureAuthenticated: RequestHandler = async (req, _res, next) => {
     throw new UnauthorizedError('Token de acesso não informado');
   }
 
-  const { sub } = verifyAccessToken(token); // erros de JWT viram 401 no errorHandler
+  const { sub, tokenVersion } = verifyAccessToken(token); // erros de JWT viram 401 no errorHandler
 
   const user = await usersRepository.findAuthInfo(sub);
   if (!user || !user.isActive) {
     throw new UnauthorizedError('Usuário não encontrado ou inativo');
   }
 
-  req.user = { id: user.id, role: user.role };
+  // Senha redefinida depois da emissão deste token: a sessão antiga não vale mais
+  if (user.tokenVersion !== tokenVersion) {
+    throw new UnauthorizedError('Sessão encerrada. Entre novamente.');
+  }
+
+  req.user = { id: user.id, role: user.role, emailVerified: user.emailVerifiedAt !== null };
   next();
 };
 

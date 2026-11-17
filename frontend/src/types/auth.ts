@@ -13,6 +13,8 @@ export interface User {
   profilePhoto: string | null;
   bio: string | null;
   role: UserRole;
+  /** ISO de quando o e-mail foi confirmado (null = pendente) */
+  emailVerifiedAt: string | null;
   /** Pontuação ELO — a categoria é derivada dela pelo backend */
   eloScore: number;
   /** Categoria atual (calculada, não editável) */
